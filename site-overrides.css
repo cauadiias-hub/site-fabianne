@@ -1,0 +1,61 @@
+:root {
+  --premium-ease: cubic-bezier(.16, 1, .3, 1);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 4px;
+}
+
+[data-booking-trigger] {
+  cursor: pointer;
+}
+
+@media (max-width: 639px) {
+  .editorial-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .editorial-grid > * {
+    grid-column: 1 / -1 !important;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .display-title,
+  .hero-title-mobile {
+    font-size: clamp(2.35rem, 10.4vw, 2.8rem) !important;
+    line-height: .94 !important;
+    letter-spacing: -.025em;
+  }
+
+  #inicio section p,
+  #inicio section h1,
+  #inicio section h2,
+  #inicio section h3 {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  #inicio > section:first-of-type {
+    min-height: auto;
+    padding-bottom: 4rem;
+  }
+
+  #inicio > section:first-of-type .mt-11 {
+    margin-top: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,34 +1,37 @@
-const nav = document.querySelector(".nav");
-const menuButton = document.querySelector(".mobile");
-const menu = document.querySelector(".nav nav");
+(() => {
+  const header = document.querySelector('header');
+  const menuButton = document.querySelector('button[aria-label="Abrir menu"]');
+  if (!header || !menuButton) return;
 
-function updateNavigation() {
-  nav?.classList.toggle("scrolled", window.scrollY > 30);
-}
+  const links = [
+    ['Sobre', '#sobre'],
+    ['Atuação', '#atuacao'],
+    ['Empresas', '#empresas'],
+    ['Psicologia', '#psicologia'],
+    ['Conteúdos', '#conteudos'],
+    ['Mídia', '#midia'],
+    ['Avaliações', '#avaliacoes'],
+  ];
 
-updateNavigation();
-window.addEventListener("scroll", updateNavigation, { passive: true });
+  let panel = header.querySelector('nav[aria-label="Navegação mobile"]');
+  if (!panel) {
+    panel = document.createElement('nav');
+    panel.setAttribute('aria-label', 'Navegação mobile');
+    panel.style.cssText = 'position:absolute;top:100%;left:0;right:0;padding:1rem 1.25rem 1.25rem;background:var(--background);border-bottom:1px solid var(--border);box-shadow:0 12px 30px rgba(54,19,49,.08);display:grid;gap:.25rem;';
+    panel.innerHTML = links.map(([label, href]) => `<a href="${href}" style="padding:.75rem 0;font-size:.68rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;">${label}</a>`).join('');
+    header.appendChild(panel);
+  }
+  panel.hidden = true;
 
-menuButton?.addEventListener("click", () => {
-  const isOpen = menu?.classList.toggle("open") ?? false;
-  menuButton.setAttribute("aria-expanded", String(isOpen));
-  menuButton.textContent = isOpen ? "×" : "☰";
-});
+  const setExpanded = (expanded) => {
+    panel.hidden = !expanded;
+    menuButton.setAttribute('aria-expanded', String(expanded));
+    menuButton.setAttribute('aria-label', expanded ? 'Fechar menu' : 'Abrir menu');
+  };
 
-menu?.addEventListener("click", (event) => {
-  if (!event.target.closest("a")) return;
-  menu.classList.remove("open");
-  menuButton?.setAttribute("aria-expanded", "false");
-  if (menuButton) menuButton.textContent = "☰";
-});
-
-document.querySelectorAll(".faq-item button").forEach((button) => {
-  button.addEventListener("click", () => {
-    const answer = button.nextElementSibling;
-    const shouldOpen = answer?.hidden ?? true;
-    document.querySelectorAll(".faq-item p").forEach((item) => { item.hidden = true; });
-    document.querySelectorAll(".faq-item button").forEach((item) => item.setAttribute("aria-expanded", "false"));
-    if (answer) answer.hidden = !shouldOpen;
-    button.setAttribute("aria-expanded", String(shouldOpen));
+  menuButton.addEventListener('click', () => setExpanded(panel.hidden));
+  panel.addEventListener('click', () => setExpanded(false));
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) setExpanded(false);
   });
-});
+})();
