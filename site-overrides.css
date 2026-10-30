@@ -2,6 +2,59 @@
   --premium-ease: cubic-bezier(.16, 1, .3, 1);
 }
 
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 3rem;
+}
+
+.review-card {
+  display: flex;
+  min-height: 18rem;
+  flex-direction: column;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--sand) 55%, white);
+}
+
+.review-stars {
+  color: var(--rose);
+  font-size: .8rem;
+  letter-spacing: .28em;
+}
+
+.review-card blockquote {
+  flex: 1;
+  margin: 2rem 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  line-height: 1.25;
+}
+
+.review-card footer {
+  display: grid;
+  gap: .25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.review-card footer strong {
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.review-card footer span {
+  color: var(--muted-foreground);
+  font-size: .78rem;
+}
+
+@media (max-width: 900px) {
+  .reviews-grid { grid-template-columns: 1fr; }
+  .review-card { min-height: 0; }
+}
+
 a:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--rose);

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Painel de agendamentos — Fabiane Costa</title>
+  <title>Painel administrativo — Fabiane Costa</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
@@ -15,8 +15,8 @@
     <section class="login-card" data-login>
       <div class="brand-orb">FC</div>
       <p class="eyebrow">Área administrativa</p>
-      <h1>Agenda da <em>Fabiane</em></h1>
-      <p class="lead">Entre para escolher os dias e horários que ficarão disponíveis no site.</p>
+      <h1>Site da <em>Fabiane</em></h1>
+      <p class="lead">Entre para gerenciar os horários, as imagens e as avaliações exibidas no site.</p>
       <form data-login-form>
         <label for="password">Senha do painel</label>
         <input id="password" name="password" type="password" autocomplete="current-password" required>
@@ -27,7 +27,7 @@
 
     <section class="dashboard" data-dashboard hidden>
       <header class="dashboard-head">
-        <div><p class="eyebrow">Painel administrativo</p><h1>Disponibilidade <em>semanal</em></h1><p>Esses períodos aparecem no site somente quando não houver outro compromisso na Google Agenda.</p></div>
+        <div><p class="eyebrow">Painel administrativo</p><h1>Conteúdo e <em>agenda</em></h1><p>Gerencie o que aparece no site e os períodos disponíveis para agendamento.</p></div>
         <button class="ghost" type="button" data-logout>Sair</button>
       </header>
       <form data-schedule-form>
@@ -45,6 +45,17 @@
         </div>
         <div class="save-bar"><p class="message" data-save-message role="status"></p><button type="submit" data-save>Salvar disponibilidade</button></div>
       </form>
+
+      <section class="content-card" aria-labelledby="images-title">
+        <div class="section-heading"><div><p class="eyebrow">Imagens do site</p><h2 id="images-title">Trocar fotografias</h2><p>Envie JPG, PNG ou WebP de até 4 MB. A alteração será aplicada em todos os locais que usam a imagem.</p></div></div>
+        <div class="images-grid" data-images-grid></div>
+      </section>
+
+      <section class="content-card" aria-labelledby="reviews-title">
+        <div class="section-heading reviews-heading"><div><p class="eyebrow">Avaliações</p><h2 id="reviews-title">Relatos publicados</h2><p>Cadastre depoimentos autorizados para a seção de avaliações do site.</p></div><button class="secondary" type="button" data-add-review>+ Adicionar avaliação</button></div>
+        <div class="reviews-list" data-reviews-list></div>
+        <div class="content-actions"><p class="message" data-content-message role="status"></p><button type="button" data-save-reviews>Salvar avaliações</button></div>
+      </section>
     </section>
   </main>
   <script type="module" src="/admin.js"></script>
