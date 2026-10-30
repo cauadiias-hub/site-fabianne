@@ -13,6 +13,10 @@ const saveMessage = document.querySelector("[data-save-message]");
 const contentMessage = document.querySelector("[data-content-message]");
 const imagesGrid = document.querySelector("[data-images-grid]");
 const reviewsList = document.querySelector("[data-reviews-list]");
+const linksList = document.querySelector("[data-links-list]");
+const mediaList = document.querySelector("[data-media-list]");
+const linksMessage = document.querySelector("[data-links-message]");
+const mediaMessage = document.querySelector("[data-media-message]");
 let siteContent = { images: {}, reviews: [] };
 
 async function api(path, options = {}) {
@@ -52,12 +56,105 @@ async function showDashboard() {
     renderWeek(config.schedule);
     siteContent = contentData.content;
     renderImages(contentData.imageSlots);
+    renderLinks(contentData.linkSlots);
+    renderMedia(siteContent.mediaItems);
     renderReviews(siteContent.reviews);
     saveMessage.textContent = "";
   } catch (error) {
     if (error.status === 401) return showLogin("Sua sessão expirou. Entre novamente.");
     saveMessage.textContent = error.message;
   }
+}
+
+function renderLinks(linkSlots) {
+  linksList.innerHTML = "";
+  for (const [key, details] of Object.entries(linkSlots)) {
+    const content = siteContent.links[key];
+    const item = document.createElement("article");
+    item.className = "link-editor";
+    item.dataset.link = key;
+    item.innerHTML = `<strong>${details.label}</strong><label>Texto do botão<input data-link-text maxlength="80"></label><label>Link ou destino<input data-link-url maxlength="2000" placeholder="https://... ou #agendar"></label><label class="check-field"><input data-link-new-tab type="checkbox"><span>Abrir em nova aba</span></label>`;
+    item.querySelector("[data-link-text]").value = content.text;
+    item.querySelector("[data-link-url]").value = content.url;
+    item.querySelector("[data-link-new-tab]").checked = content.newTab;
+    linksList.appendChild(item);
+  }
+}
+
+function readLinks() {
+  return Object.fromEntries([...linksList.querySelectorAll(".link-editor")].map((item) => [
+    item.dataset.link,
+    {
+      text: item.querySelector("[data-link-text]").value,
+      url: item.querySelector("[data-link-url]").value,
+      newTab: item.querySelector("[data-link-new-tab]").checked,
+    },
+  ]));
+}
+
+function mediaElement(media = {}) {
+  const item = document.createElement("article");
+  item.className = "media-editor";
+  item.dataset.id = media.id || crypto.randomUUID();
+  item.dataset.imageUrl = media.imageUrl || "";
+  item.innerHTML = `<div class="review-editor-head"><strong>Conteúdo de mídia</strong><button class="remove-review" type="button">Remover</button></div><div class="media-editor-grid"><div class="media-cover"><div class="media-cover-preview"></div><label class="file-field"><span>Selecionar imagem ou capa</span><input data-media-file type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label><button class="upload-cover" type="button">Enviar capa</button></div><div class="media-fields"><label>Tipo<select data-media-type><option value="image">Imagem</option><option value="video">Vídeo</option><option value="podcast">Podcast</option><option value="interview">Entrevista</option></select></label><label>Seção do site<select data-media-section><option value="midia">Mídia</option><option value="inicio">Capa</option><option value="sobre">Sobre</option><option value="atuacao">Atuação</option><option value="empresas">Empresas</option><option value="psicologia">Psicologia</option><option value="conteudos">Conteúdos</option><option value="avaliacoes">Avaliações</option><option value="contato">Contato</option></select></label><label class="wide-field">Título<input data-media-title maxlength="120"></label><label class="wide-field">Descrição<textarea data-media-description maxlength="320" rows="3"></textarea></label><label class="wide-field">Link do conteúdo<input data-media-url maxlength="2000" placeholder="https://youtube.com/... ou https://open.spotify.com/..."></label></div></div>`;
+  item.querySelector("[data-media-type]").value = media.type || "image";
+  item.querySelector("[data-media-section]").value = media.section || "midia";
+  item.querySelector("[data-media-title]").value = media.title || "";
+  item.querySelector("[data-media-description]").value = media.description || "";
+  item.querySelector("[data-media-url]").value = media.url || "";
+  const preview = item.querySelector(".media-cover-preview");
+  if (media.imageUrl) preview.innerHTML = `<img src="${media.imageUrl}" alt="Prévia da capa">`;
+  else preview.textContent = "Sem imagem de capa";
+  item.querySelector(".remove-review").addEventListener("click", () => item.remove());
+  item.querySelector(".upload-cover").addEventListener("click", () => uploadMediaCover(item));
+  return item;
+}
+
+function renderMedia(mediaItems) {
+  mediaList.innerHTML = "";
+  mediaItems.forEach((media) => mediaList.appendChild(mediaElement(media)));
+}
+
+async function uploadMediaCover(item) {
+  const file = item.querySelector("[data-media-file]").files[0];
+  const button = item.querySelector(".upload-cover");
+  if (!file) {
+    mediaMessage.textContent = "Escolha uma imagem antes de enviar.";
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "Enviando…";
+  mediaMessage.textContent = "Enviando imagem…";
+  try {
+    const body = new FormData();
+    body.append("image", file);
+    const { url } = await api("/api/admin/media-upload", { method: "POST", body });
+    item.dataset.imageUrl = url;
+    item.querySelector(".media-cover-preview").innerHTML = `<img src="${url}" alt="Prévia da capa">`;
+    item.querySelector("[data-media-file]").value = "";
+    mediaMessage.className = "message success";
+    mediaMessage.textContent = "Imagem enviada. Salve as mídias para publicar.";
+  } catch (error) {
+    if (error.status === 401) return showLogin("Sua sessão expirou. Entre novamente.");
+    mediaMessage.className = "message";
+    mediaMessage.textContent = error.message;
+  } finally {
+    button.disabled = false;
+    button.textContent = "Enviar capa";
+  }
+}
+
+function readMedia() {
+  return [...mediaList.querySelectorAll(".media-editor")].map((item) => ({
+    id: item.dataset.id,
+    type: item.querySelector("[data-media-type]").value,
+    section: item.querySelector("[data-media-section]").value,
+    title: item.querySelector("[data-media-title]").value,
+    description: item.querySelector("[data-media-description]").value,
+    url: item.querySelector("[data-media-url]").value,
+    imageUrl: item.dataset.imageUrl,
+  })).filter((item) => item.title.trim() || item.url.trim() || item.imageUrl);
 }
 
 function renderImages(imageSlots) {
@@ -216,6 +313,57 @@ document.querySelector("[data-add-review]").addEventListener("click", () => {
   }
   reviewsList.appendChild(reviewElement());
   reviewsList.lastElementChild.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+document.querySelector("[data-save-links]").addEventListener("click", async () => {
+  const button = document.querySelector("[data-save-links]");
+  button.disabled = true;
+  linksMessage.className = "message";
+  linksMessage.textContent = "Salvando botões e links…";
+  try {
+    const { content } = await api("/api/admin/content", { method: "PUT", body: JSON.stringify({ links: readLinks() }) });
+    siteContent = content;
+    linksMessage.className = "message success";
+    linksMessage.textContent = "Botões e links atualizados com sucesso.";
+  } catch (error) {
+    if (error.status === 401) return showLogin("Sua sessão expirou. Entre novamente.");
+    linksMessage.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.querySelector("[data-add-media]").addEventListener("click", () => {
+  if (mediaList.children.length >= 24) {
+    mediaMessage.textContent = "É possível publicar até 24 mídias.";
+    return;
+  }
+  mediaList.appendChild(mediaElement());
+  mediaList.lastElementChild.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+document.querySelector("[data-save-media]").addEventListener("click", async () => {
+  const button = document.querySelector("[data-save-media]");
+  const mediaItems = readMedia();
+  if (mediaItems.some((item) => !item.title.trim() || (!item.url.trim() && !item.imageUrl))) {
+    mediaMessage.textContent = "Cada mídia precisa de título e de um link ou imagem.";
+    return;
+  }
+  button.disabled = true;
+  mediaMessage.className = "message";
+  mediaMessage.textContent = "Salvando mídias…";
+  try {
+    const { content } = await api("/api/admin/content", { method: "PUT", body: JSON.stringify({ mediaItems }) });
+    siteContent = content;
+    renderMedia(content.mediaItems);
+    mediaMessage.className = "message success";
+    mediaMessage.textContent = "Mídias publicadas com sucesso.";
+  } catch (error) {
+    if (error.status === 401) return showLogin("Sua sessão expirou. Entre novamente.");
+    mediaMessage.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
 });
 
 document.querySelector("[data-save-reviews]").addEventListener("click", async () => {

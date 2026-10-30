@@ -16,7 +16,7 @@
       <div class="brand-orb">FC</div>
       <p class="eyebrow">Área administrativa</p>
       <h1>Site da <em>Fabiane</em></h1>
-      <p class="lead">Entre para gerenciar os horários, as imagens e as avaliações exibidas no site.</p>
+      <p class="lead">Entre para gerenciar horários, imagens, botões, mídias e avaliações exibidas no site.</p>
       <form data-login-form>
         <label for="password">Senha do painel</label>
         <input id="password" name="password" type="password" autocomplete="current-password" required>
@@ -49,6 +49,18 @@
       <section class="content-card" aria-labelledby="images-title">
         <div class="section-heading"><div><p class="eyebrow">Imagens do site</p><h2 id="images-title">Trocar fotografias</h2><p>Envie JPG, PNG ou WebP de até 4 MB. A alteração será aplicada em todos os locais que usam a imagem.</p></div></div>
         <div class="images-grid" data-images-grid></div>
+      </section>
+
+      <section class="content-card" aria-labelledby="links-title">
+        <div class="section-heading"><div><p class="eyebrow">Botões e links</p><h2 id="links-title">Destinos e textos</h2><p>Altere o texto e o endereço dos principais botões do site. Use #agendar para abrir o agendamento.</p></div></div>
+        <div class="links-list" data-links-list></div>
+        <div class="content-actions"><p class="message" data-links-message role="status"></p><button type="button" data-save-links>Salvar botões e links</button></div>
+      </section>
+
+      <section class="content-card" aria-labelledby="media-title">
+        <div class="section-heading reviews-heading"><div><p class="eyebrow">Mídias do site</p><h2 id="media-title">Vídeos, podcasts e entrevistas</h2><p>Adicione conteúdos em qualquer seção. Para vídeos e áudios, cole o link da plataforma; imagens e capas podem ser enviadas diretamente.</p></div><button class="secondary" type="button" data-add-media>+ Adicionar mídia</button></div>
+        <div class="media-editors" data-media-list></div>
+        <div class="content-actions"><p class="message" data-media-message role="status"></p><button type="button" data-save-media>Salvar mídias</button></div>
       </section>
 
       <section class="content-card" aria-labelledby="reviews-title">

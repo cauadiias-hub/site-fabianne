@@ -23,3 +23,22 @@ test("avaliações vazias não são publicadas", () => {
   const content = normalizeContent({ reviews: [{ name: "", text: "" }] });
   assert.deepEqual(content.reviews, []);
 });
+
+test("links perigosos voltam para o destino padrão", () => {
+  const content = normalizeContent({
+    links: { heroPrimary: { text: "Clique", url: "javascript:alert(1)" } },
+  });
+  assert.equal(content.links.heroPrimary.url, "#atuacao");
+  assert.equal(content.links.heroPrimary.text, "Clique");
+});
+
+test("mídias aceitam plataformas externas e descartam itens incompletos", () => {
+  const content = normalizeContent({
+    mediaItems: [
+      { type: "video", section: "psicologia", title: "Entrevista", url: "https://youtube.com/watch?v=123" },
+      { type: "podcast", section: "midia", title: "", url: "https://open.spotify.com/show/123" },
+    ],
+  });
+  assert.equal(content.mediaItems.length, 1);
+  assert.equal(content.mediaItems[0].section, "psicologia");
+});

@@ -25,15 +25,60 @@ export const IMAGE_SLOTS = Object.freeze({
   },
 });
 
+export const LINK_SLOTS = Object.freeze({
+  navBooking: { label: "Botão do menu", defaultText: "Agendar com Fabiane", defaultUrl: "#agendar" },
+  heroPrimary: { label: "Botão principal da capa", defaultText: "Conheça minha atuação", defaultUrl: "#atuacao" },
+  heroBooking: { label: "Link de horários da capa", defaultText: "Ver horários disponíveis", defaultUrl: "#agendar" },
+  aboutContact: { label: "Link da seção Sobre", defaultText: "Conversar sobre o seu momento", defaultUrl: "#contato" },
+  companiesContact: { label: "Link da seção Empresas", defaultText: "Conversar sobre sua organização", defaultUrl: "#contato" },
+  finalBooking: { label: "Botão final", defaultText: "Agendar com Fabiane", defaultUrl: "#agendar" },
+});
+
+export const DEFAULT_MEDIA = Object.freeze([
+  {
+    id: "media-video-default",
+    type: "video",
+    section: "midia",
+    title: "Conversas sobre pessoas, trabalho e desenvolvimento.",
+    description: "Acompanhe vídeos e entrevistas disponíveis no YouTube.",
+    url: "https://www.youtube.com/results?search_query=Fabiane+Andr%C3%A9+Costa",
+    imageUrl: "",
+  },
+  {
+    id: "media-podcast-default",
+    type: "podcast",
+    section: "midia",
+    title: "Ideias para escutar com calma e levar para a vida.",
+    description: "Encontre participações e conversas em plataformas de áudio.",
+    url: "https://open.spotify.com/search/Fabiane%20Andr%C3%A9%20Costa",
+    imageUrl: "",
+  },
+]);
+
 export const DEFAULT_CONTENT = Object.freeze({
   images: Object.fromEntries(
     Object.entries(IMAGE_SLOTS).map(([key, slot]) => [key, slot.defaultUrl]),
   ),
+  links: Object.fromEntries(
+    Object.entries(LINK_SLOTS).map(([key, slot]) => [key, {
+      text: slot.defaultText,
+      url: slot.defaultUrl,
+      newTab: false,
+    }]),
+  ),
+  mediaItems: DEFAULT_MEDIA,
   reviews: [],
 });
 
 function text(value, maxLength) {
   return String(value || "").trim().slice(0, maxLength);
+}
+
+function safeUrl(value, fallback = "") {
+  const url = text(value, 2_000);
+  if (!url) return fallback;
+  if (url.startsWith("#") || url.startsWith("/") || url.startsWith("https://") || url.startsWith("http://") || url.startsWith("mailto:") || url.startsWith("tel:")) return url;
+  return fallback;
 }
 
 export function normalizeContent(input = {}) {
@@ -44,6 +89,29 @@ export function normalizeContent(input = {}) {
       ? value
       : slot.defaultUrl;
   }
+
+  const links = {};
+  for (const [key, slot] of Object.entries(LINK_SLOTS)) {
+    const item = input.links?.[key] || {};
+    links[key] = {
+      text: text(item.text, 80) || slot.defaultText,
+      url: safeUrl(item.url, slot.defaultUrl),
+      newTab: Boolean(item.newTab),
+    };
+  }
+
+  const mediaItems = (Array.isArray(input.mediaItems) ? input.mediaItems : DEFAULT_MEDIA)
+    .slice(0, 24)
+    .map((item, index) => ({
+      id: text(item.id, 80) || `media-${Date.now()}-${index}`,
+      type: ["image", "video", "podcast", "interview"].includes(item.type) ? item.type : "image",
+      section: ["inicio", "sobre", "atuacao", "empresas", "psicologia", "conteudos", "midia", "avaliacoes", "contato"].includes(item.section) ? item.section : "midia",
+      title: text(item.title, 120),
+      description: text(item.description, 320),
+      url: safeUrl(item.url),
+      imageUrl: safeUrl(item.imageUrl),
+    }))
+    .filter((item) => item.title && (item.url || item.imageUrl));
 
   const reviews = (Array.isArray(input.reviews) ? input.reviews : [])
     .slice(0, 12)
@@ -56,7 +124,7 @@ export function normalizeContent(input = {}) {
     }))
     .filter((review) => review.name && review.text);
 
-  return { images, reviews };
+  return { images, links, mediaItems, reviews };
 }
 
 export async function loadContent() {

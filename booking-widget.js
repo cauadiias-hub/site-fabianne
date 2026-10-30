@@ -176,7 +176,7 @@ panels.form.querySelector("form").addEventListener("submit", async (event) => {
 
 document.addEventListener("click", (event) => {
   const link = event.target.closest("a");
-  if (!link || (!link.hasAttribute("data-booking-trigger") && !/agendar/i.test(link.textContent || ""))) return;
+  if (!link?.hasAttribute("data-booking-trigger")) return;
   event.preventDefault();
   openBooking();
 }, true);
