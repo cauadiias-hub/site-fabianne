@@ -72,22 +72,32 @@ function applyLinks(links = {}) {
 
 function mediaCard(item) {
   const article = document.createElement("article");
-  article.className = `cms-media-card cms-media-${item.type}`;
+  const visualType = item.type === "podcast" ? "podcast" : "video";
+  article.className = `media-link-card media-${visualType}-card cms-media-card cms-media-${item.type}`;
+  const icon = document.createElement("div");
+  icon.className = "media-link-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.innerHTML = item.type === "podcast"
+    ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2a5 5 0 0 0-5 5v5a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/></svg>`
+    : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m9 7 7 5-7 5V7Z"/><circle cx="12" cy="12" r="9"/></svg>`;
+  article.appendChild(icon);
+  const body = document.createElement("div");
   if (item.imageUrl) {
     const image = document.createElement("img");
+    image.className = "cms-media-cover";
     image.src = item.imageUrl;
     image.alt = item.title;
     image.loading = "lazy";
-    article.appendChild(image);
+    body.appendChild(image);
   }
   if (!item.imageUrl && item.url && item.type === "video" && /\.(mp4|webm)(?:\?|$)/i.test(item.url)) {
     const video = document.createElement("video");
+    video.className = "cms-media-cover";
     video.src = item.url;
     video.controls = true;
     video.preload = "metadata";
-    article.appendChild(video);
+    body.appendChild(video);
   }
-  const body = document.createElement("div");
   const kicker = document.createElement("p");
   kicker.className = "media-kicker";
   kicker.textContent = MEDIA_LABELS[item.type] || "Mídia";
@@ -113,7 +123,7 @@ function mediaCard(item) {
     link.href = item.url;
     link.target = "_blank";
     link.rel = "noreferrer";
-    link.textContent = item.type === "image" ? "Ver imagem ↗" : "Acessar conteúdo ↗";
+    link.innerHTML = `${item.type === "image" ? "Ver imagem" : item.type === "material" ? "Abrir material" : "Acessar conteúdo"} <span>↗</span>`;
     body.appendChild(link);
   }
   article.appendChild(body);
