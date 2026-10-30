@@ -20,6 +20,7 @@ const MEDIA_LABELS = {
   video: "Vídeo",
   podcast: "Podcast",
   interview: "Entrevista",
+  material: "Material",
 };
 
 function normalizedPath(value) {
@@ -79,6 +80,13 @@ function mediaCard(item) {
     image.loading = "lazy";
     article.appendChild(image);
   }
+  if (!item.imageUrl && item.url && item.type === "video" && /\.(mp4|webm)(?:\?|$)/i.test(item.url)) {
+    const video = document.createElement("video");
+    video.src = item.url;
+    video.controls = true;
+    video.preload = "metadata";
+    article.appendChild(video);
+  }
   const body = document.createElement("div");
   const kicker = document.createElement("p");
   kicker.className = "media-kicker";
@@ -91,6 +99,13 @@ function mediaCard(item) {
     description.className = "media-link-copy";
     description.textContent = item.description;
     body.appendChild(description);
+  }
+  if (item.url && item.type === "podcast" && /\.(mp3|m4a|ogg)(?:\?|$)/i.test(item.url)) {
+    const audio = document.createElement("audio");
+    audio.src = item.url;
+    audio.controls = true;
+    audio.preload = "metadata";
+    body.appendChild(audio);
   }
   if (item.url) {
     const link = document.createElement("a");
@@ -166,6 +181,46 @@ function applyReviews(reviews = []) {
   root.appendChild(grid);
 }
 
+function renderReviewForm() {
+  const root = document.querySelector("#reviews-widget .reviews-public");
+  if (!root || root.querySelector("[data-public-review-form]")) return;
+  const wrapper = document.createElement("div");
+  wrapper.className = "public-review-box";
+  wrapper.innerHTML = `<div><p class="eyebrow"><span class="eyebrow-line"></span>Sua experiência</p><h3>Deixe sua avaliação</h3><p>Seu relato será enviado para análise e somente aparecerá no site depois da aprovação da Fabiane.</p></div><form data-public-review-form><div class="public-review-fields"><label>Seu nome<input name="name" maxlength="80" required></label><label>Contexto <span>(opcional)</span><input name="context" maxlength="100" placeholder="Ex.: Atendimento online"></label><label>Sua nota<select name="rating"><option value="5">5 estrelas</option><option value="4">4 estrelas</option><option value="3">3 estrelas</option><option value="2">2 estrelas</option><option value="1">1 estrela</option></select></label><label class="public-review-text">Sua avaliação<textarea name="text" minlength="20" maxlength="600" rows="5" required></textarea></label></div><label class="public-review-consent"><input type="checkbox" name="acceptedPrivacy" required><span>Autorizo o envio deste relato para análise e possível publicação no site.</span></label><input class="review-honeypot" name="website" tabindex="-1" autocomplete="off"><div class="public-review-submit"><p role="status"></p><button type="submit">Enviar avaliação</button></div></form>`;
+  const form = wrapper.querySelector("form");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = form.querySelector("button");
+    const status = form.querySelector("[role=status]");
+    const values = new FormData(form);
+    button.disabled = true;
+    status.textContent = "Enviando sua avaliação…";
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          name: values.get("name"),
+          context: values.get("context"),
+          rating: Number(values.get("rating")),
+          text: values.get("text"),
+          website: values.get("website"),
+          acceptedPrivacy: values.get("acceptedPrivacy") === "on",
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || "Não foi possível enviar a avaliação.");
+      form.reset();
+      status.textContent = "Avaliação enviada! Ela será analisada antes da publicação.";
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+  root.appendChild(wrapper);
+}
+
 fetch("/api/content", { headers: { Accept: "application/json" } })
   .then((response) => response.ok ? response.json() : Promise.reject())
   .then(({ content }) => {
@@ -174,4 +229,5 @@ fetch("/api/content", { headers: { Accept: "application/json" } })
     applyMedia(content.mediaItems);
     applyReviews(content.reviews);
   })
-  .catch(() => {});
+  .catch(() => {})
+  .finally(renderReviewForm);

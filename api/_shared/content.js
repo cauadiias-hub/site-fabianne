@@ -68,6 +68,7 @@ export const DEFAULT_CONTENT = Object.freeze({
   ),
   mediaItems: DEFAULT_MEDIA,
   reviews: [],
+  reviewSubmissions: [],
 });
 
 function text(value, maxLength) {
@@ -104,7 +105,7 @@ export function normalizeContent(input = {}) {
     .slice(0, 24)
     .map((item, index) => ({
       id: text(item.id, 80) || `media-${Date.now()}-${index}`,
-      type: ["image", "video", "podcast", "interview"].includes(item.type) ? item.type : "image",
+      type: ["image", "video", "podcast", "interview", "material"].includes(item.type) ? item.type : "image",
       section: ["inicio", "sobre", "atuacao", "empresas", "psicologia", "conteudos", "midia", "avaliacoes", "contato"].includes(item.section) ? item.section : "midia",
       title: text(item.title, 120),
       description: text(item.description, 320),
@@ -124,7 +125,19 @@ export function normalizeContent(input = {}) {
     }))
     .filter((review) => review.name && review.text);
 
-  return { images, links, mediaItems, reviews };
+  const reviewSubmissions = (Array.isArray(input.reviewSubmissions) ? input.reviewSubmissions : [])
+    .slice(0, 100)
+    .map((review, index) => ({
+      id: text(review.id, 80) || `submission-${Date.now()}-${index}`,
+      name: text(review.name, 80),
+      context: text(review.context, 100),
+      text: text(review.text, 600),
+      rating: Math.min(5, Math.max(1, Number(review.rating) || 5)),
+      createdAt: text(review.createdAt, 40) || new Date().toISOString(),
+    }))
+    .filter((review) => review.name && review.text);
+
+  return { images, links, mediaItems, reviews, reviewSubmissions };
 }
 
 export async function loadContent() {
@@ -143,7 +156,7 @@ export async function saveContent(input) {
   const content = normalizeContent(input);
   await put(`${CONTENT_PREFIX}${Date.now()}.json`, JSON.stringify(content), {
     access: "public",
-    addRandomSuffix: false,
+    addRandomSuffix: true,
     contentType: "application/json; charset=utf-8",
     cacheControlMaxAge: 60,
   });

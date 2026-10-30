@@ -80,6 +80,17 @@ button:disabled { opacity: .55; cursor: wait; }
 .upload-cover { min-height: 40px; padding: 0 15px; color: white; background: var(--wine); }
 .media-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .wide-field { grid-column: 1 / -1; }
+.pending-count { display: inline-grid; place-items: center; min-width: 34px; height: 34px; margin-left: 8px; padding: 0 10px; border-radius: 999px; color: white; background: var(--wine); font: 700 14px "DM Sans", sans-serif; vertical-align: middle; }
+.pending-reviews { display: grid; gap: 14px; }
+.pending-review-card { padding: 18px; border: 1px solid #e6ccd8; border-radius: 18px; background: #fffafd; }
+.pending-review-card .review-editor-head > div { display: grid; gap: 4px; }
+.pending-review-card small { color: var(--muted); font-size: 11px; }
+.pending-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+.pending-actions button { min-height: 40px; padding: 0 16px; color: white; background: var(--wine); }
+.pending-actions .secondary { color: var(--wine); background: #eadce3; }
+.pending-actions .danger { color: #8c3b55; background: #f8e8ed; }
+.pending-empty { padding: 28px; border: 1px dashed #d9c4cf; border-radius: 16px; color: var(--muted); text-align: center; }
 @media (max-width: 760px) { .content-card { padding: 22px 18px; } .settings-grid, .images-grid, .review-fields { grid-template-columns: 1fr; } .reviews-heading { flex-direction: column; align-items: flex-start; } .content-actions { flex-direction: column; align-items: stretch; } .content-actions .message { text-align: left; } .content-actions button { width: 100%; } .image-card { grid-template-columns: 86px 1fr; } .image-card img { width: 86px; height: 108px; } }
 @media (max-width: 900px) { .link-editor { grid-template-columns: 1fr; align-items: stretch; } .media-editor-grid, .media-fields { grid-template-columns: 1fr; } .wide-field { grid-column: auto; } .media-cover { max-width: 280px; } }
+@media (max-width: 600px) { .pending-actions { align-items: stretch; flex-direction: column; } }
 @media (max-width: 760px) { .admin-shell { width: min(100% - 20px, 1120px); padding-top: 22px; } .login-card { padding: 30px 24px; } .dashboard-head { display: block; } .dashboard-head .ghost { margin-top: 12px; } .settings-grid { grid-template-columns: 1fr; } .day-row { grid-template-columns: 1fr; gap: 8px; } .period { grid-template-columns: 1fr 18px 1fr 38px; } .settings-card, .week-card { padding: 22px 18px; } .week-title { align-items: flex-start; } .week-title > span { display: none; } .save-bar { flex-direction: column; align-items: stretch; } .save-bar .message { text-align: left; } }

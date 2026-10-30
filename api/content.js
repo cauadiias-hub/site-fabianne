@@ -3,7 +3,8 @@ import { json, methodNotAllowed, safeError } from "./_shared/http.js";
 
 export async function GET() {
   try {
-    return json({ ok: true, content: await loadContent() }, 200, {
+    const { reviewSubmissions, ...content } = await loadContent();
+    return json({ ok: true, content }, 200, {
       "Cache-Control": "public, max-age=0, s-maxage=30, stale-while-revalidate=120",
     });
   } catch (error) {

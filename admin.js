@@ -17,6 +17,9 @@ const linksList = document.querySelector("[data-links-list]");
 const mediaList = document.querySelector("[data-media-list]");
 const linksMessage = document.querySelector("[data-links-message]");
 const mediaMessage = document.querySelector("[data-media-message]");
+const pendingReviews = document.querySelector("[data-pending-reviews]");
+const pendingCount = document.querySelector("[data-pending-count]");
+const pendingMessage = document.querySelector("[data-pending-message]");
 let siteContent = { images: {}, reviews: [] };
 
 async function api(path, options = {}) {
@@ -58,6 +61,7 @@ async function showDashboard() {
     renderImages(contentData.imageSlots);
     renderLinks(contentData.linkSlots);
     renderMedia(siteContent.mediaItems);
+    renderPendingReviews(siteContent.reviewSubmissions);
     renderReviews(siteContent.reviews);
     saveMessage.textContent = "";
   } catch (error) {
@@ -97,7 +101,7 @@ function mediaElement(media = {}) {
   item.className = "media-editor";
   item.dataset.id = media.id || crypto.randomUUID();
   item.dataset.imageUrl = media.imageUrl || "";
-  item.innerHTML = `<div class="review-editor-head"><strong>Conteúdo de mídia</strong><button class="remove-review" type="button">Remover</button></div><div class="media-editor-grid"><div class="media-cover"><div class="media-cover-preview"></div><label class="file-field"><span>Selecionar imagem ou capa</span><input data-media-file type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label><button class="upload-cover" type="button">Enviar capa</button></div><div class="media-fields"><label>Tipo<select data-media-type><option value="image">Imagem</option><option value="video">Vídeo</option><option value="podcast">Podcast</option><option value="interview">Entrevista</option></select></label><label>Seção do site<select data-media-section><option value="midia">Mídia</option><option value="inicio">Capa</option><option value="sobre">Sobre</option><option value="atuacao">Atuação</option><option value="empresas">Empresas</option><option value="psicologia">Psicologia</option><option value="conteudos">Conteúdos</option><option value="avaliacoes">Avaliações</option><option value="contato">Contato</option></select></label><label class="wide-field">Título<input data-media-title maxlength="120"></label><label class="wide-field">Descrição<textarea data-media-description maxlength="320" rows="3"></textarea></label><label class="wide-field">Link do conteúdo<input data-media-url maxlength="2000" placeholder="https://youtube.com/... ou https://open.spotify.com/..."></label></div></div>`;
+  item.innerHTML = `<div class="review-editor-head"><strong>Conteúdo de mídia</strong><button class="remove-review" type="button">Remover</button></div><div class="media-editor-grid"><div class="media-cover"><div class="media-cover-preview"></div><label class="file-field"><span>Selecionar arquivo</span><input data-media-file type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,audio/mpeg,audio/mp4,audio/ogg,application/pdf,.docx"></label><button class="upload-cover" type="button">Enviar arquivo</button></div><div class="media-fields"><label>Tipo<select data-media-type><option value="image">Imagem</option><option value="video">Vídeo</option><option value="podcast">Podcast</option><option value="interview">Entrevista</option><option value="material">Material</option></select></label><label>Seção do site<select data-media-section><option value="midia">Mídia</option><option value="inicio">Capa</option><option value="sobre">Sobre</option><option value="atuacao">Atuação</option><option value="empresas">Empresas</option><option value="psicologia">Psicologia</option><option value="conteudos">Conteúdos</option><option value="avaliacoes">Avaliações</option><option value="contato">Contato</option></select></label><label class="wide-field">Título<input data-media-title maxlength="120"></label><label class="wide-field">Descrição<textarea data-media-description maxlength="320" rows="3"></textarea></label><label class="wide-field">Link ou arquivo publicado<input data-media-url maxlength="2000" placeholder="Link externo ou preenchido após o envio do arquivo"></label></div></div>`;
   item.querySelector("[data-media-type]").value = media.type || "image";
   item.querySelector("[data-media-section]").value = media.section || "midia";
   item.querySelector("[data-media-title]").value = media.title || "";
@@ -129,9 +133,14 @@ async function uploadMediaCover(item) {
   try {
     const body = new FormData();
     body.append("image", file);
-    const { url } = await api("/api/admin/media-upload", { method: "POST", body });
-    item.dataset.imageUrl = url;
-    item.querySelector(".media-cover-preview").innerHTML = `<img src="${url}" alt="Prévia da capa">`;
+    const { url, isImage, fileName } = await api("/api/admin/media-upload", { method: "POST", body });
+    if (isImage) {
+      item.dataset.imageUrl = url;
+      item.querySelector(".media-cover-preview").innerHTML = `<img src="${url}" alt="Prévia da capa">`;
+    } else {
+      item.querySelector("[data-media-url]").value = url;
+      item.querySelector(".media-cover-preview").textContent = fileName || "Arquivo enviado";
+    }
     item.querySelector("[data-media-file]").value = "";
     mediaMessage.className = "message success";
     mediaMessage.textContent = "Imagem enviada. Salve as mídias para publicar.";
@@ -141,7 +150,7 @@ async function uploadMediaCover(item) {
     mediaMessage.textContent = error.message;
   } finally {
     button.disabled = false;
-    button.textContent = "Enviar capa";
+    button.textContent = "Enviar arquivo";
   }
 }
 
@@ -155,6 +164,74 @@ function readMedia() {
     url: item.querySelector("[data-media-url]").value,
     imageUrl: item.dataset.imageUrl,
   })).filter((item) => item.title.trim() || item.url.trim() || item.imageUrl);
+}
+
+function pendingReviewElement(review) {
+  const item = document.createElement("article");
+  item.className = "pending-review-card";
+  item.dataset.id = review.id;
+  const sentAt = new Date(review.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  item.innerHTML = `<div class="review-editor-head"><div><strong>Avaliação recebida</strong><small>Enviada em ${sentAt}</small></div></div><div class="review-fields"><label>Nome<input data-pending-name maxlength="80" value=""></label><label>Contexto <span>(opcional)</span><input data-pending-context maxlength="100" value=""></label><label>Nota<select data-pending-rating><option value="5">5 estrelas</option><option value="4">4 estrelas</option><option value="3">3 estrelas</option><option value="2">2 estrelas</option><option value="1">1 estrela</option></select></label><label class="review-text-field">Depoimento<textarea data-pending-text maxlength="600" rows="5"></textarea></label></div><div class="pending-actions"><button class="danger" type="button" data-pending-remove>Remover</button><button class="secondary" type="button" data-pending-save>Salvar edição</button><button type="button" data-pending-publish>Publicar no site</button></div>`;
+  item.querySelector("[data-pending-name]").value = review.name;
+  item.querySelector("[data-pending-context]").value = review.context;
+  item.querySelector("[data-pending-rating]").value = String(review.rating);
+  item.querySelector("[data-pending-text]").value = review.text;
+  item.querySelector("[data-pending-remove]").addEventListener("click", () => updatePendingReview(item, "remove"));
+  item.querySelector("[data-pending-save]").addEventListener("click", () => updatePendingReview(item, "save"));
+  item.querySelector("[data-pending-publish]").addEventListener("click", () => updatePendingReview(item, "publish"));
+  return item;
+}
+
+function renderPendingReviews(submissions = []) {
+  pendingReviews.innerHTML = "";
+  pendingCount.textContent = String(submissions.length);
+  if (!submissions.length) {
+    pendingReviews.innerHTML = `<div class="pending-empty">Nenhuma avaliação aguardando análise.</div>`;
+    return;
+  }
+  submissions.forEach((review) => pendingReviews.appendChild(pendingReviewElement(review)));
+}
+
+function pendingReviewData(item) {
+  const original = siteContent.reviewSubmissions.find((review) => review.id === item.dataset.id);
+  return {
+    id: item.dataset.id,
+    name: item.querySelector("[data-pending-name]").value,
+    context: item.querySelector("[data-pending-context]").value,
+    rating: Number(item.querySelector("[data-pending-rating]").value),
+    text: item.querySelector("[data-pending-text]").value,
+    createdAt: original?.createdAt || new Date().toISOString(),
+  };
+}
+
+async function updatePendingReview(item, action) {
+  const review = pendingReviewData(item);
+  if (action !== "remove" && (!review.name.trim() || !review.text.trim())) {
+    pendingMessage.textContent = "Preencha o nome e o depoimento antes de continuar.";
+    return;
+  }
+  const buttons = item.querySelectorAll("button");
+  buttons.forEach((button) => { button.disabled = true; });
+  pendingMessage.className = "message";
+  pendingMessage.textContent = action === "publish" ? "Publicando avaliação…" : "Atualizando avaliação…";
+  const remaining = siteContent.reviewSubmissions.filter((entry) => entry.id !== review.id);
+  const reviewSubmissions = action === "save" ? [...remaining, review] : remaining;
+  const reviews = action === "publish" ? [...siteContent.reviews, review] : siteContent.reviews;
+  try {
+    const { content } = await api("/api/admin/content", {
+      method: "PUT",
+      body: JSON.stringify({ reviewSubmissions, reviews }),
+    });
+    siteContent = content;
+    renderPendingReviews(content.reviewSubmissions);
+    renderReviews(content.reviews);
+    pendingMessage.className = "message success";
+    pendingMessage.textContent = action === "publish" ? "Avaliação publicada no site." : action === "remove" ? "Avaliação removida." : "Edição salva.";
+  } catch (error) {
+    if (error.status === 401) return showLogin("Sua sessão expirou. Entre novamente.");
+    pendingMessage.textContent = error.message;
+    buttons.forEach((button) => { button.disabled = false; });
+  }
 }
 
 function renderImages(imageSlots) {

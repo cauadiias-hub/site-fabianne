@@ -21,6 +21,7 @@ export async function PUT(request) {
       ...(data.reviews !== undefined ? { reviews: data.reviews } : {}),
       ...(data.links !== undefined ? { links: data.links } : {}),
       ...(data.mediaItems !== undefined ? { mediaItems: data.mediaItems } : {}),
+      ...(data.reviewSubmissions !== undefined ? { reviewSubmissions: data.reviewSubmissions } : {}),
     });
     return json({ ok: true, content });
   } catch (error) {

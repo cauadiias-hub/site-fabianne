@@ -42,3 +42,18 @@ test("mídias aceitam plataformas externas e descartam itens incompletos", () =>
   assert.equal(content.mediaItems.length, 1);
   assert.equal(content.mediaItems[0].section, "psicologia");
 });
+
+test("avaliações recebidas ficam separadas das publicadas", () => {
+  const content = normalizeContent({
+    reviewSubmissions: [{ name: "Visitante", text: "Uma experiência muito positiva e acolhedora.", rating: 5 }],
+  });
+  assert.equal(content.reviewSubmissions.length, 1);
+  assert.equal(content.reviews.length, 0);
+});
+
+test("materiais enviados são aceitos na biblioteca", () => {
+  const content = normalizeContent({
+    mediaItems: [{ type: "material", section: "conteudos", title: "Guia", url: "https://example.com/guia.pdf" }],
+  });
+  assert.equal(content.mediaItems[0].type, "material");
+});
