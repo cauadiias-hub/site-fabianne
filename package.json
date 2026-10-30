@@ -1,0 +1,12 @@
+{
+  "name": "site-fabianne",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "24.x" },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check booking-widget.js && node --check admin.js"
+  },
+  "dependencies": { "luxon": "3.7.2" }
+}

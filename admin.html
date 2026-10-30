@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Painel de agendamentos — Fabiane Costa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <section class="login-card" data-login>
+      <div class="brand-orb">FC</div>
+      <p class="eyebrow">Área administrativa</p>
+      <h1>Agenda da <em>Fabiane</em></h1>
+      <p class="lead">Entre para escolher os dias e horários que ficarão disponíveis no site.</p>
+      <form data-login-form>
+        <label for="password">Senha do painel</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Entrar</button>
+      </form>
+      <p class="message" data-login-message role="alert"></p>
+    </section>
+
+    <section class="dashboard" data-dashboard hidden>
+      <header class="dashboard-head">
+        <div><p class="eyebrow">Painel administrativo</p><h1>Disponibilidade <em>semanal</em></h1><p>Esses períodos aparecem no site somente quando não houver outro compromisso na Google Agenda.</p></div>
+        <button class="ghost" type="button" data-logout>Sair</button>
+      </header>
+      <form data-schedule-form>
+        <div class="settings-card">
+          <h2>Regras dos horários</h2>
+          <div class="settings-grid">
+            <label>Duração de cada atendimento<select name="slotDuration"><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">1 hora</option><option value="90">1h30</option><option value="120">2 horas</option></select></label>
+            <label>Antecedência mínima<input name="minNoticeHours" type="number" min="0" max="168" step="1"><span>horas</span></label>
+            <label>Agenda aberta por<input name="bookingWindowDays" type="number" min="7" max="180" step="1"><span>dias</span></label>
+          </div>
+        </div>
+        <div class="week-card">
+          <div class="week-title"><div><h2>Dias disponíveis</h2><p>Você pode adicionar mais de um período por dia.</p></div><span>Fuso de São Paulo</span></div>
+          <div class="week-list" data-week-list></div>
+        </div>
+        <div class="save-bar"><p class="message" data-save-message role="status"></p><button type="submit" data-save>Salvar disponibilidade</button></div>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="/admin.js"></script>
+</body>
+</html>
