@@ -41,6 +41,8 @@
 .booking-success-icon { display: grid; place-items: center; width: 70px; height: 70px; margin: 0 auto 18px; border-radius: 50%; color: var(--booking-wine); background: var(--booking-pink); font-size: 32px; }
 .booking-success h3 { margin: 0 0 10px; font: 500 34px "Playfair Display", serif; }
 .booking-success p { color: #765d70; line-height: 1.6; }
+.booking-success-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+.booking-success-actions .booking-btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .booking-confirmation { display: inline-block; margin: 12px 0; padding: 8px 13px; border-radius: 9px; background: #eee1e8; font-family: monospace; }
 .booking-meet { display: inline-flex; margin-top: 12px; padding: 12px 18px; border-radius: 999px; color: white; background: var(--booking-wine); }
 @media (max-width: 640px) {

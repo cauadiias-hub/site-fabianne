@@ -1,4 +1,15 @@
 const state = { slots: [], selectedDate: null, selectedSlot: null };
+const WHATSAPP_NUMBER = "554799234008";
+
+function whatsappConfirmationUrl({ name, label, confirmation }) {
+  const message = [
+    "Olá! Eu vim pelo site e acabei de fazer um agendamento.",
+    `Nome: ${name}`,
+    `Data e horário: ${label}`,
+    `Código de confirmação: ${confirmation}`,
+  ].join("\n");
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
 
 const overlay = document.createElement("div");
 overlay.className = "booking-overlay";
@@ -143,6 +154,7 @@ panels.form.querySelector("form").addEventListener("submit", async (event) => {
   const submit = form.querySelector("[type=submit]");
   const errorBox = panels.form.querySelector(".booking-form-error");
   const values = new FormData(form);
+  const bookingName = String(values.get("name") || "").trim();
   submit.disabled = true;
   submit.textContent = "Confirmando…";
   errorBox.textContent = "";
@@ -161,10 +173,16 @@ panels.form.querySelector("form").addEventListener("submit", async (event) => {
     });
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || "Não foi possível confirmar.");
-    panels.success.innerHTML = `<div class="booking-success"><div class="booking-success-icon">✓</div><h3>Horário confirmado</h3><p>${state.selectedSlot.label}</p><p>O compromisso já foi incluído na agenda da Fabiane.</p><span class="booking-confirmation">Código ${data.confirmation}</span>${data.meetLink ? `<br><a class="booking-meet" href="${data.meetLink}" target="_blank" rel="noopener">Abrir Google Meet</a>` : ""}<div><button class="booking-btn secondary" type="button" data-finish>Fechar</button></div></div>`;
+    const whatsappUrl = whatsappConfirmationUrl({
+      name: bookingName,
+      label: state.selectedSlot.label,
+      confirmation: data.confirmation,
+    });
+    panels.success.innerHTML = `<div class="booking-success"><div class="booking-success-icon">✓</div><h3>Horário confirmado</h3><p>${state.selectedSlot.label}</p><p>O compromisso já foi incluído na agenda da Fabiane.</p><span class="booking-confirmation">Código ${data.confirmation}</span>${data.meetLink ? `<br><a class="booking-meet" href="${data.meetLink}" target="_blank" rel="noopener">Abrir Google Meet</a>` : ""}<div class="booking-success-actions"><a class="booking-btn primary" href="${whatsappUrl}" data-whatsapp-confirmation>Continuar no WhatsApp</a><button class="booking-btn secondary" type="button" data-finish>Fechar</button></div></div>`;
     panels.success.querySelector("[data-finish]").addEventListener("click", closeBooking);
     form.reset();
     showPanel("success");
+    setTimeout(() => window.location.assign(whatsappUrl), 900);
   } catch (error) {
     errorBox.textContent = error.message;
     if (/não está mais disponível|acabou de ser reservado/i.test(error.message)) setTimeout(openBooking, 1500);
